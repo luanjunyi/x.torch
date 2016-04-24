@@ -39,6 +39,7 @@ function Solver:reset()
    self.lossHistory = {}
    self.trainAccHistory = {}
    self.valAccHistory = {}
+   self.optimState = {}
 end
 
 function Solver:checkAccuracy(X, y, sampleSize)
@@ -81,13 +82,13 @@ function Solver:step(XBatch, yBatch)
 
       return loss, grads
    end
-
-   self.optimize(feval, parameters, self.optimConfig)
+   
+   self.optimize(feval, parameters, self.optimConfig, self.optimState)
 end
 
 function Solver:train()
 
-   if self.initWeight and not self.firstTrain then
+   if self.initWeight and self.firstTrain then
       -- initWeights will change the underlying storage of weights
       -- if there are existing weightGrads, later call will check if the
       -- weights and weighGrads have same storageOffset. So if it's not
