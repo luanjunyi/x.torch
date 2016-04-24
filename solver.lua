@@ -103,7 +103,7 @@ function Solver:train()
    for t = 1, self.numEpoches do
       shuffle = torch.randperm(numTrain):long()
 
-      print('epoch ' .. t .. ": " .. self.model:parameters()[1]:mean())
+      -- print('epoch ' .. t .. ": " .. self.model:parameters()[1]:mean())
       for i = 1, numTrain, self.batchSize do
          shuffledIndex = shuffle[{ {i, math.min(i + self.batchSize - 1, numTrain)} }]
          XBatch = self.XTrain:index(1, shuffledIndex)
