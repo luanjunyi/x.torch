@@ -48,18 +48,17 @@ function Solver:checkAccuracy(X, y, sampleSize)
       sampleSize = y:size()[1]
    end
 
-   local shuffle = torch.randperm(y:size()[1])[{ {1, sampleSize} }]:long()
-   X = X:index(1, shuffle)
-   y = y:index(1, shuffle)
-   
+   X = X:narrow(1, 1, sampleSize)
+   y = y:narrow(1, 1, sampleSize)
+
    local output = self.model:forward(X)
    local _;
    local yPredict;
-   _, yPredict = torch.sort(output, true)
-
+   local _, yPredict = torch.sort(output, true)
    yPredict = yPredict[{ {},{1} }]:reshape(y:size()):long()
    y = y:long()
    local acc = y:eq(yPredict):sum() / sampleSize
+
    return acc
 end
 
@@ -74,7 +73,7 @@ function Solver:step(XBatch, yBatch)
       local delta = self.criterion:backward(output, yBatch)
       self.model:backward(XBatch, delta)
 
-      table.insert(self.lossHistory, loss)
+      -- table.insert(self.lossHistory, loss)
 
       -- if self.verbose then
       --    print('loss: ' .. loss)
@@ -99,9 +98,9 @@ function Solver:train()
 
    self.model:training()
 
-   numTrain = self.XTrain:size()[1]
+   local numTrain = self.XTrain:size()[1]
    for t = 1, self.numEpoches do
-      shuffle = torch.randperm(numTrain):long()
+      local shuffle = torch.randperm(numTrain):long()
 
       -- print('epoch ' .. t .. ": " .. self.model:parameters()[1]:mean())
       for i = 1, numTrain, self.batchSize do
@@ -129,7 +128,7 @@ function Solver:train()
 end
 
 function Solver:cloneParams(params)
-   ret = {}
+   local ret = {}
    for k, v in ipairs(params) do
       ret[k] = v:clone()
    end
@@ -139,7 +138,7 @@ end
 function Solver:initWeights(std)
    print('init weight with std = ' .. std .. ' learning rate = ' .. self.optimConfig.learningRate)
    for i = 1, #self.model do
-      layer = self.model:get(i)
+      local layer = self.model:get(i)
       if layer.weight then
          layer.weight = torch.randn(layer.weight:size())
          layer.weight:mul(std)
